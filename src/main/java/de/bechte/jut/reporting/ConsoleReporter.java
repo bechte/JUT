@@ -43,13 +43,12 @@ public class ConsoleReporter implements Reporter {
             "[%s] %s%s%s",
             isSuccessful ? "OKAY" : "FAIL",
             name,
-            getPlaceholderSpaces(name.length() + duration.length(), 80),
+            getPlaceholderSpaces(name.length() + duration.length(), 120),
             duration
         )
     );
 
     if (!isSuccessful) {
-      System.out.println(testResult.getFailure().getLocalizedMessage());
       testResult.getFailure().printStackTrace(System.out);
     }
   }
