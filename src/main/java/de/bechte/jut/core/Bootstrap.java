@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2014. Stefan Bechtold. All rights reserved.
+ */
+
 package de.bechte.jut.core;
 
 import de.bechte.jut.reporting.ConsoleReporter;
