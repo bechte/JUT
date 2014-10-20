@@ -2,13 +2,15 @@
  * Copyright (c) 2014. Stefan Bechtold. All rights reserved.
  */
 
-package de.bechte.jut.core;
+package de.bechte.jut.reporting;
+
+import de.bechte.jut.core.TestResult;
+import de.bechte.jut.core.Testable;
 
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.Collection;
 import java.util.LinkedList;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 public class TestResultGroup implements TestResult {
@@ -34,8 +36,8 @@ public class TestResultGroup implements TestResult {
   }
 
   @Override
-  public String getCanonicalName() {
-    return testable.getCanonicalName();
+  public String getUniqueName() {
+    return testable.getUniqueName();
   }
 
   @Override

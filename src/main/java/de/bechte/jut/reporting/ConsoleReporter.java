@@ -4,9 +4,8 @@
 
 package de.bechte.jut.reporting;
 
+import de.bechte.jut.core.Reporter;
 import de.bechte.jut.core.TestResult;
-import de.bechte.jut.core.TestResultEntry;
-import de.bechte.jut.core.TestResultGroup;
 
 import java.time.Duration;
 import java.util.Collection;
@@ -30,11 +29,13 @@ public class ConsoleReporter implements Reporter {
   }
 
   private void printResults(Collection<TestResult> testResults, int level) {
-    for (TestResult testResult : testResults) {
-      printResult(testResult, level);
-      if (testResult instanceof TestResultGroup)
-        printResults(((TestResultGroup)testResult).getTestResults(), level + 1);
-    }
+    testResults.stream()
+        .sorted((l, r) -> l.getName().compareTo(r.getName()))
+        .forEach(t -> {
+          printResult(t, level);
+          if (t instanceof TestResultGroup)
+            printResults(((TestResultGroup) t).getTestResults(), level + 1);
+        });
   }
 
   private void printResult(TestResult testResult, int level) {
@@ -60,16 +61,8 @@ public class ConsoleReporter implements Reporter {
   }
 
   private String formatDuration(Duration duration) {
-    long milliSeconds = duration.toMillis();
-    if (milliSeconds < 10000) {
-      String value = String.valueOf(milliSeconds);
-      return String.format("%s%s ms", getPlaceholderSpaces(value.length(), 10), value);
-    } else {
-      long seconds = duration.getSeconds();
-      milliSeconds -= seconds * 1000;
-      String value = String.format("%d.%d", seconds, milliSeconds);
-      return String.format("%s%s s ", getPlaceholderSpaces(value.length(), 10), value);
-    }
+    String value = String.valueOf(duration.toMillis());
+    return String.format("%s%s ms", getPlaceholderSpaces(value.length(), 10), value);
   }
 
 

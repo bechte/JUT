@@ -9,7 +9,7 @@ import java.time.Duration;
 public interface TestResult {
   String getName();
 
-  String getCanonicalName();
+  String getUniqueName();
 
   Duration getDuration();
 

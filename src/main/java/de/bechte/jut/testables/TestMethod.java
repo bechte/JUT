@@ -5,14 +5,14 @@
 package de.bechte.jut.testables;
 
 import de.bechte.jut.core.TestResult;
-import de.bechte.jut.core.TestResultEntry;
+import de.bechte.jut.reporting.TestResultEntry;
 import de.bechte.jut.core.Testable;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 public class TestMethod<T> implements Testable {
-  protected static final String CANONICAL_PATTERN = "%s(%s)";
+  protected static final String UNIQUE_NAME_FORMAT = "%s.%s";
 
   private TestClass<T> testClass;
   private Method methodUnderTest;
@@ -28,12 +28,12 @@ public class TestMethod<T> implements Testable {
   }
 
   @Override
-  public String getCanonicalName() {
-    return String.format(CANONICAL_PATTERN, testClass.getCanonicalName(), getName());
+  public String getUniqueName() {
+    return String.format(UNIQUE_NAME_FORMAT, testClass.getUniqueName(), getName());
   }
 
   @Override
-  public TestResult runTest() {
+  public TestResult run() {
     TestResultEntry testResult = new TestResultEntry(this);
     try {
       invokeTestMethod();
@@ -50,10 +50,10 @@ public class TestMethod<T> implements Testable {
     T testInstance = testClass.createTestInstance();
 
     try {
-      testClass.invokeBeforeMethods(testInstance);
+      testClass.setupTestInstance(testInstance);
       methodUnderTest.invoke(testInstance);
     } finally {
-      testClass.invokeAfterMethods(testInstance);
+      testClass.teardownTestInstance(testInstance);
     }
   }
 }

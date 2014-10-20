@@ -9,7 +9,6 @@ import de.bechte.jut.annotations.Before;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -34,26 +33,30 @@ public class TestContext<P, T> extends TestClass<T> {
   }
 
   @Override
-  public void invokeBeforeMethods(T testInstance) throws InvocationTargetException, IllegalAccessException {
-    parent.invokeBeforeMethods(getParentInstance(testInstance));
+  public void setupTestInstance(T testInstance) {
+    parent.setupTestInstance(lookupParentInstance(testInstance));
     invokeMethodsForAnnotation(testInstance, Before.class);
   }
 
   @Override
-  public void invokeAfterMethods(T testInstance) throws InvocationTargetException, IllegalAccessException {
+  public void teardownTestInstance(T testInstance) {
     invokeMethodsForAnnotation(testInstance, After.class);
-    parent.invokeAfterMethods(getParentInstance(testInstance));
+    parent.teardownTestInstance(lookupParentInstance(testInstance));
   }
 
-  protected P getParentInstance(T testInstance) throws IllegalAccessException {
+  P lookupParentInstance(T testInstance) {
     List<Field> fields = Stream.of(classUnderTest.getDeclaredFields())
         .filter(f -> f.isSynthetic())
         .filter(f -> f.getType().equals(parent.classUnderTest))
         .collect(Collectors.toList());
 
     if (!fields.isEmpty()) {
-      fields.get(0).setAccessible(true);
-      return (P) fields.get(0).get(testInstance);
+      try {
+        fields.get(0).setAccessible(true);
+        return (P) fields.get(0).get(testInstance);
+      } catch (IllegalAccessException e) {
+        throw new AssertionError("Member instance denied access to field containing the enclosing instance!", e);
+      }
     }
 
     throw new IllegalStateException("Member instance has no field containing the enclosing instance!");

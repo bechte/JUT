@@ -7,58 +7,93 @@ package de.bechte.jut.testables;
 import de.bechte.jut.annotations.Before;
 import de.bechte.jut.annotations.Context;
 import de.bechte.jut.annotations.Test;
-import de.bechte.jut.samples.*;
+import de.bechte.jut.doubles.testables.TestClassMock;
+import de.bechte.jut.doubles.samples.TestContextWithConflictingSetupAndTeardowns;
+import de.bechte.jut.doubles.samples.TestContextWithPrivateConstructor;
+import de.bechte.jut.doubles.samples.TestContextWithSingleTest;
 
 import static de.bechte.jut.matchers.ExpectThrowable.expectThrowable;
+import static de.bechte.jut.doubles.samples.TestContextWithConflictingSetupAndTeardowns.Priority;
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 public class TestContextTest {
-  @Context
-  public class GivenInvalidTestContext {
-    @Test
-    public void createInstanceFails() throws Exception {
-      expectThrowable(AssertionError.class).withMessage("Class not instantiable").in(() -> {
-        TestClass<TestClassWithPrivateContextConstructorDummy> testClass = new TestClass<>(TestClassWithPrivateContextConstructorDummy.class);
-        TestContext<TestClassWithPrivateContextConstructorDummy, TestClassWithPrivateContextConstructorDummy.InvalidContext> testContext = new TestContext<>(testClass, TestClassWithPrivateContextConstructorDummy.InvalidContext.class);
-        testContext.createTestInstance();
-      });
-    }
+  @Test
+  public void givenInvalidTestContext_createInstanceFails() throws Exception {
+    expectThrowable(AssertionError.class).withMessage("Class not instantiable").in(() -> {
+      TestClass<TestContextWithPrivateConstructor> testClass = new TestClass<>(TestContextWithPrivateConstructor.class);
+      TestContext<TestContextWithPrivateConstructor, TestContextWithPrivateConstructor.InvalidContext> testContext =
+          new TestContext<>(testClass, TestContextWithPrivateConstructor.InvalidContext.class);
+      testContext.createTestInstance();
+    });
   }
 
   @Context
-  public class WithValidTestContext {
-    private SingleTestInContextClassSpy parentInstance;
-    private TestClassSpy<SingleTestInContextClassSpy> testClass;
-    private TestContext<SingleTestInContextClassSpy, SingleTestInContextClassSpy.TestContext> testContext;
+  public class GivenTestContextWithSingleTest {
+    private TestContextWithSingleTest parentInstance;
+    private TestClassMock<TestContextWithSingleTest> testClass;
+    private TestContext<TestContextWithSingleTest, TestContextWithSingleTest.TestContext> testContext;
 
     @Before
     public void setupTestContext() throws Exception {
-      parentInstance = new SingleTestInContextClassSpy();
-      testClass = new TestClassSpy<>(parentInstance);
-      testContext = new TestContext<>(testClass, SingleTestInContextClassSpy.TestContext.class);
+      parentInstance = new TestContextWithSingleTest();
+      testClass = new TestClassMock<>(parentInstance);
+      testContext = new TestContext<>(testClass, TestContextWithSingleTest.TestContext.class);
     }
 
     @Test
-    public void invokesBeforeMethodsOnParent() throws Exception {
-      SingleTestInContextClassSpy.TestContext instance = testContext.createTestInstance();
-      testContext.invokeBeforeMethods(instance);
-      assertThat(testClass.invocationCounter.getInvocations("invokeBeforeMethods"), is(1));
+    public void createsAValidTestInstanceOfClassUnderTest() throws Exception {
+      TestContextWithSingleTest.TestContext instance = testContext.createTestInstance();
+      assertThat(instance, is(instanceOf(TestContextWithSingleTest.TestContext.class)));
     }
 
     @Test
-    public void invokesAfterMethodsOnParent() throws Exception {
-      SingleTestInContextClassSpy.TestContext instance = testContext.createTestInstance();
-      testContext.invokeAfterMethods(instance);
-      assertThat(testClass.invocationCounter.getInvocations("invokeAfterMethods"), is(1));
+    public void invokesSetupTestInstanceOnParent() throws Exception {
+      TestContextWithSingleTest.TestContext instance = testContext.createTestInstance();
+      testContext.setupTestInstance(instance);
+      assertThat(testClass.testInstanceOnSetup, is(parentInstance));
+    }
+
+    @Test
+    public void invokesTeardownTestInstanceOnParent() throws Exception {
+      TestContextWithSingleTest.TestContext instance = testContext.createTestInstance();
+      testContext.teardownTestInstance(instance);
+      assertThat(testClass.testInstanceOnTeardown, is(parentInstance));
     }
 
     @Test
     public void returnsTheCorrectParentInstance() throws Exception {
-      SingleTestInContextClassSpy.TestContext instance = testContext.createTestInstance();
-      SingleTestInContextClassSpy parentInstance = testContext.getParentInstance(instance);
-      assertThat(parentInstance, is(this.parentInstance));
+      TestContextWithSingleTest.TestContext instance = testContext.createTestInstance();
+      assertThat(testContext.lookupParentInstance(instance), is(parentInstance));
+    }
+  }
+
+  @Context
+  public class GivenTestContextWithConflictingSetupAndTeardowns {
+    private TestContextWithConflictingSetupAndTeardowns parentInstance;
+    private TestClass<TestContextWithConflictingSetupAndTeardowns> testClass;
+    private TestContext<TestContextWithConflictingSetupAndTeardowns, TestContextWithConflictingSetupAndTeardowns.ConflictingContext> testContext;
+
+    @Before
+    public void setupTestContext() throws Exception {
+      parentInstance = new TestContextWithConflictingSetupAndTeardowns();
+      testClass = new TestClass<>(TestContextWithConflictingSetupAndTeardowns.class);
+      testContext = new TestContext<>(testClass, TestContextWithConflictingSetupAndTeardowns.ConflictingContext.class);
+    }
+
+    @Test
+    public void invokesSetupTestInstanceOnParentBeforeItSetupsTheTestsInstanceItself() throws Exception {
+      TestContextWithConflictingSetupAndTeardowns.ConflictingContext instance = testContext.createTestInstance();
+      testContext.setupTestInstance(instance);
+      assertThat(instance.getSetupPriority(), is(Priority.INNER));
+    }
+
+    @Test
+    public void invokesTeardownTestInstanceOnParentAfterItTeardownsTheTestsInstanceItself() throws Exception {
+      TestContextWithConflictingSetupAndTeardowns.ConflictingContext instance = testContext.createTestInstance();
+      testContext.teardownTestInstance(instance);
+      assertThat(instance.getTeardownPriority(), is(Priority.OUTER));
     }
   }
 }

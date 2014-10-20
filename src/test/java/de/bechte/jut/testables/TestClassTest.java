@@ -4,83 +4,175 @@
 
 package de.bechte.jut.testables;
 
+import de.bechte.jut.annotations.After;
+import de.bechte.jut.annotations.Before;
 import de.bechte.jut.annotations.Context;
 import de.bechte.jut.annotations.Test;
-import de.bechte.jut.samples.MultipleTestClassSpy;
-import de.bechte.jut.samples.MultipleTestClassWithIgnoreSpy;
-import de.bechte.jut.samples.SingleTestClassSpy;
-import de.bechte.jut.samples.TestClassWithPrivateConstructorDummy;
+import de.bechte.jut.doubles.core.PositiveTestableFactorySpy;
+import de.bechte.jut.core.TestResult;
+import de.bechte.jut.core.TestableFactory;
+import de.bechte.jut.doubles.core.TestableFactorySpy;
+import de.bechte.jut.doubles.samples.TestClassWithMultipleTests;
+import de.bechte.jut.doubles.samples.TestClassWithMultipleTestsIgnored;
+import de.bechte.jut.doubles.samples.TestClassWithSingleTest;
+import de.bechte.jut.doubles.samples.TestClassWithPrivateConstructor;
 
+import static de.bechte.jut.core.ApplicationContext.testableFactory;
 import static de.bechte.jut.matchers.ExpectThrowable.expectThrowable;
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 public class TestClassTest {
-  @Context
-  public class GivenInvalidTestClass {
-    @Test
-    public void createInstanceFails() throws Exception {
-      expectThrowable(AssertionError.class).withMessage("Class not instantiable").in(() -> {
-        TestClass<TestClassWithPrivateConstructorDummy> testClass = new TestClass<>(TestClassWithPrivateConstructorDummy.class);
-        testClass.createTestInstance();
-      });
-    }
+  @Test
+  public void givenInvalidTestClass_createInstanceFails() throws Exception {
+    expectThrowable(AssertionError.class).withMessage("Class not instantiable").in(() -> {
+      TestClass<TestClassWithPrivateConstructor> testClass = new TestClass<>(TestClassWithPrivateConstructor.class);
+      testClass.createTestInstance();
+    });
   }
 
   @Context
-  public class GivenSingleTest {
-    TestClass<SingleTestClassSpy> testClass = new TestClass<>(SingleTestClassSpy.class);
+  public class GivenTestableFactorySpy {
+    private TestableFactory oldFactory;
+    private TestableFactorySpy testableFactorySpy = new PositiveTestableFactorySpy();
 
-    @Test
-    public void getNameReturnsSimpleNameOfClassUnderTest() throws Exception {
-      assertThat(testClass.getName(), is(SingleTestClassSpy.class.getSimpleName()));
+    @Before
+    public void saveTestableFactorySpyFromApplicationContext() throws Exception {
+      oldFactory = testableFactory;
+      testableFactory = testableFactorySpy;
     }
 
-    @Test
-    public void getCanonicalNameReturnsFullyQualifiedNameOfClassUnderTest() throws Exception {
-      assertThat(testClass.getCanonicalName(), is(SingleTestClassSpy.class.getCanonicalName()));
+    @After
+    public void restoreSavedTestableFactoryInApplicationContext() throws Exception {
+      testableFactory = oldFactory;
+      oldFactory = null;
     }
 
-    @Test
-    public void createsTestInstance() throws Exception {
-      SingleTestClassSpy instance = testClass.createTestInstance();
-      assertThat(instance, is(instanceOf(SingleTestClassSpy.class)));
+    private Class<?> classUnderTest;
+    private TestClass<?> testClass;
+
+    @Context
+    public class GivenTestClassWithSingleTest implements HasValidTestClassBehavior {
+      @Before
+      public void setupTestClass() throws Exception {
+        classUnderTest = TestClassWithSingleTest.class;
+        testClass = new TestClass<>(classUnderTest);
+      }
+
+      @Override
+      public Long getNumberOfTestsInClass() {
+        return 1L;
+      }
+
+      @Override
+      public TestClass getTestClass() {
+        return testClass;
+      }
+
+      @Override
+      public Class getClassUnderTest() {
+        return classUnderTest;
+      }
+
+      @Override
+      public TestableFactorySpy getTestableFactorySpy() {
+        return testableFactorySpy;
+      }
     }
 
-    @Test
-    public void allTestsAreSelectedForRunning() throws Exception {
-      assertThat(testClass.getTests().size(), is(SingleTestClassSpy.NUMBER_OF_TEST_METHODS));
+    @Context
+    public class GivenTestClassWithMultipleTests implements HasValidTestClassBehavior {
+      @Before
+      public void setupTestClass() throws Exception {
+        classUnderTest = TestClassWithMultipleTests.class;
+        testClass = new TestClass<>(classUnderTest);
+      }
+
+      @Override
+      public Long getNumberOfTestsInClass() {
+        return TestClassWithMultipleTests.NUMBER_OF_TEST_METHODS;
+      }
+
+      @Override
+      public TestClass getTestClass() {
+        return testClass;
+      }
+
+      @Override
+      public Class getClassUnderTest() {
+        return classUnderTest;
+      }
+
+      @Override
+      public TestableFactorySpy getTestableFactorySpy() {
+        return testableFactorySpy;
+      }
+    }
+
+    @Context
+    public class GivenTestClassWithMultipleTestsIgnored implements HasValidTestClassBehavior {
+      @Before
+      public void setupTestClass() throws Exception {
+        classUnderTest = TestClassWithMultipleTestsIgnored.class;
+        testClass = new TestClass<>(classUnderTest);
+      }
+
+      @Override
+      public Long getNumberOfTestsInClass() {
+        return TestClassWithMultipleTestsIgnored.NUMBER_OF_ACTIVE_TEST_METHODS;
+      }
+
+      @Override
+      public TestClass getTestClass() {
+        return testClass;
+      }
+
+      @Override
+      public Class getClassUnderTest() {
+        return classUnderTest;
+      }
+
+      @Override
+      public TestableFactorySpy getTestableFactorySpy() {
+        return testableFactorySpy;
+      }
     }
   }
+}
 
-  @Context
-  public class GivenMultipleTestsInClass {
-    TestClass<MultipleTestClassSpy> testClass = new TestClass<>(MultipleTestClassSpy.class);
-
-    @Test
-    public void getNameReturnsSimpleNameOfClassUnderTest() throws Exception {
-      assertThat(testClass.getName(), is(MultipleTestClassSpy.class.getSimpleName()));
-    }
-
-    @Test
-    public void allTestsAreSelectedForRunning() throws Exception {
-      assertThat(testClass.getTests().size(), is(MultipleTestClassSpy.NUMBER_OF_TEST_METHODS));
-    }
+interface HasValidTestClassBehavior {
+  @Test
+  default void createsAValidTestInstanceOfClassUnderTest() throws Exception {
+    Object instance = getTestClass().createTestInstance();
+    assertThat(instance, is(instanceOf(getClassUnderTest())));
   }
 
-  @Context
-  public class GivenMultipleTestsWithIgnoreInClass {
-    TestClass<MultipleTestClassWithIgnoreSpy> testClass = new TestClass<>(MultipleTestClassWithIgnoreSpy.class);
-
-    @Test
-    public void getNameReturnsSimpleNameOfClassUnderTest() throws Exception {
-      assertThat(testClass.getName(), is(MultipleTestClassWithIgnoreSpy.class.getSimpleName()));
-    }
-
-    @Test
-    public void onlyNonIgnoredTestsAreSelectedForRunning() throws Exception {
-      assertThat(testClass.getTests().size(), is(MultipleTestClassWithIgnoreSpy.NUMBER_OF_ACTIVE_TEST_METHODS));
-    }
+  @Test
+  default void getName_returnsSimpleNameOfClassUnderTest() throws Exception {
+    assertThat(getTestClass().getName(), is(getClassUnderTest().getSimpleName()));
   }
+
+  @Test
+  default void getUniqueName_returnsCanonicalNameOfClassUnderTest() throws Exception {
+    assertThat(getTestClass().getUniqueName(), is(getClassUnderTest().getCanonicalName()));
+  }
+
+  @Test
+  default void callsRunOnEveryChild() throws Exception {
+    getTestClass().run();
+    getTestableFactorySpy().allTestables.forEach(t -> assertThat(t.wasRun, is(true)));
+  }
+
+  @Test
+  default void returnTestResultWithValidResults() throws Exception {
+    TestResult testResult = getTestClass().run();
+    assertThat(testResult.isSuccessful(), is(true));
+    assertThat(testResult.getNumberOfTests(), is(getNumberOfTestsInClass()));
+  }
+
+  Long getNumberOfTestsInClass();
+  TestClass getTestClass();
+  Class getClassUnderTest();
+  TestableFactorySpy getTestableFactorySpy();
 }

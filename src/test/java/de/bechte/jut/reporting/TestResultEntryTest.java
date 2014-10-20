@@ -2,12 +2,12 @@
  * Copyright (c) 2014. Stefan Bechtold. All rights reserved.
  */
 
-package de.bechte.jut.core;
+package de.bechte.jut.reporting;
 
 import de.bechte.jut.annotations.Before;
 import de.bechte.jut.annotations.Context;
 import de.bechte.jut.annotations.Test;
-import de.bechte.jut.testables.TestableStub;
+import de.bechte.jut.doubles.testables.PositiveTestableSpy;
 
 import java.time.Duration;
 
@@ -22,18 +22,18 @@ public class TestResultEntryTest {
 
     @Before
     public void createTestResultEntry() throws Exception {
-      testResultEntry = new TestResultEntry(new TestableStub());
+      testResultEntry = new TestResultEntry(new PositiveTestableSpy());
       testResultEntry.success();
     }
 
     @Test
     public void hasNameFromTestable() throws Exception {
-      assertThat(testResultEntry.getName(), is(TestableStub.NAME));
+      assertThat(testResultEntry.getName(), is(PositiveTestableSpy.NAME));
     }
 
     @Test
-    public void hasCanonicalFromTestable() throws Exception {
-      assertThat(testResultEntry.getCanonicalName(), is(TestableStub.CANONICAL_NAME));
+    public void hasUniqueNameFromTestable() throws Exception {
+      assertThat(testResultEntry.getUniqueName(), is(PositiveTestableSpy.CANONICAL_NAME));
     }
 
     @Test
@@ -74,7 +74,7 @@ public class TestResultEntryTest {
 
     @Before
     public void createTestResultEntry() throws Exception {
-      testResultEntry = new TestResultEntry(new TestableStub());
+      testResultEntry = new TestResultEntry(new PositiveTestableSpy());
       testResultEntry.fail(failure);
     }
 

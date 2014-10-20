@@ -2,16 +2,18 @@
  * Copyright (c) 2014. Stefan Bechtold. All rights reserved.
  */
 
-package de.bechte.jut.core;
+package de.bechte.jut.doubles.reporting;
+
+import de.bechte.jut.core.TestResult;
 
 import java.time.Duration;
 
-public class TestResultEntryFake implements TestResult {
+public class TestResultEntryStub implements TestResult {
   private final String name;
   private final boolean isSuccessful;
   private final Duration duration;
 
-  public TestResultEntryFake(String name, boolean isSuccessful, Long durationInMillis) {
+  public TestResultEntryStub(String name, boolean isSuccessful, Long durationInMillis) {
     this.name = name;
     this.isSuccessful = isSuccessful;
     this.duration = Duration.ofMillis(durationInMillis);
@@ -23,8 +25,8 @@ public class TestResultEntryFake implements TestResult {
   }
 
   @Override
-  public String getCanonicalName() {
-    return TestResultEntryFake.class.getCanonicalName();
+  public String getUniqueName() {
+    return TestResultEntryStub.class.getCanonicalName();
   }
 
   @Override

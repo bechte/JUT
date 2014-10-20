@@ -2,12 +2,13 @@
  * Copyright (c) 2014. Stefan Bechtold. All rights reserved.
  */
 
-package de.bechte.jut.core;
+package de.bechte.jut.reporting;
 
 import de.bechte.jut.annotations.Before;
 import de.bechte.jut.annotations.Context;
 import de.bechte.jut.annotations.Test;
-import de.bechte.jut.testables.TestableStub;
+import de.bechte.jut.doubles.reporting.TestResultEntryStub;
+import de.bechte.jut.doubles.testables.PositiveTestableSpy;
 
 import java.time.Duration;
 import java.util.Collections;
@@ -16,23 +17,23 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 public class TestResultGroupTest {
-  private TestResultGroup testResultGroup = new TestResultGroup(new TestableStub());
+  private TestResultGroup testResultGroup = new TestResultGroup(new PositiveTestableSpy());
 
   @Test
   public void returnsNameFromTestable() throws Exception {
-    assertThat(testResultGroup.getName(), is(TestableStub.NAME));
+    assertThat(testResultGroup.getName(), is(PositiveTestableSpy.NAME));
   }
 
   @Test
-  public void returnsCanonicalNameFromTestable() throws Exception {
-    assertThat(testResultGroup.getCanonicalName(), is(TestableStub.CANONICAL_NAME));
+  public void returnsUniqueNameFromTestable() throws Exception {
+    assertThat(testResultGroup.getUniqueName(), is(PositiveTestableSpy.CANONICAL_NAME));
   }
 
   @Context
   public class GivenOneSuccessfulEntry {
     @Before
     public void addSuccessfulEntry() throws Exception {
-      testResultGroup.addTestResults(Collections.singleton(new TestResultEntryFake("Entry1", true, 1L)));
+      testResultGroup.addTestResults(Collections.singleton(new TestResultEntryStub("Entry1", true, 1L)));
     }
 
     @Test
@@ -64,7 +65,7 @@ public class TestResultGroupTest {
     public class GivenTwoSuccessfulEntries {
       @Before
       public void addAnotherSuccessfulEntry() throws Exception {
-        testResultGroup.addTestResults(Collections.singleton(new TestResultEntryFake("Entry2", true, 2L)));
+        testResultGroup.addTestResults(Collections.singleton(new TestResultEntryStub("Entry2", true, 2L)));
       }
 
       @Test
@@ -97,7 +98,7 @@ public class TestResultGroupTest {
     public class GivenOneSuccessfulAndOneFailingEntry {
       @Before
       public void addFailingEntry() throws Exception {
-        testResultGroup.addTestResults(Collections.singleton(new TestResultEntryFake("Entry2", false, 2L)));
+        testResultGroup.addTestResults(Collections.singleton(new TestResultEntryStub("Entry2", false, 2L)));
       }
 
       @Test
@@ -127,7 +128,7 @@ public class TestResultGroupTest {
   public class GivenOneFailingEntry {
     @Before
     public void addFailingEntry() throws Exception {
-      testResultGroup.addTestResults(Collections.singleton(new TestResultEntryFake("Entry1", false, 1L)));
+      testResultGroup.addTestResults(Collections.singleton(new TestResultEntryStub("Entry1", false, 1L)));
     }
 
     @Test

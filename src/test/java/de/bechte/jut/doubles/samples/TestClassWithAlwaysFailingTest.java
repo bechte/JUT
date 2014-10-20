@@ -2,18 +2,18 @@
  * Copyright (c) 2014. Stefan Bechtold. All rights reserved.
  */
 
-package de.bechte.jut.samples;
+package de.bechte.jut.doubles.samples;
 
 import de.bechte.jut.annotations.After;
 import de.bechte.jut.annotations.Before;
 import de.bechte.jut.annotations.Test;
 
-public class SingleTestClassSpy {
-  public static int NUMBER_OF_TEST_METHODS = 1;
+public class TestClassWithAlwaysFailingTest {
+  public static final AssertionError ASSERTION_ERROR = new AssertionError("Always fail!");
 
-  public static int beforeMethodInvocations;
-  public static int afterMethodInvocations;
-  public static int testMethodInvocations;
+  public int beforeMethodInvocations;
+  public int afterMethodInvocations;
+  public int testMethodInvocations;
 
   @Before
   public void setUp() {
@@ -28,5 +28,6 @@ public class SingleTestClassSpy {
   @Test
   public void testMethod() {
     testMethodInvocations++;
+    throw ASSERTION_ERROR;
   }
 }
