@@ -9,6 +9,8 @@ import java.time.Duration;
 public interface TestResult {
   String getName();
 
+  String getCanonicalName();
+
   Duration getDuration();
 
   boolean isSuccessful();

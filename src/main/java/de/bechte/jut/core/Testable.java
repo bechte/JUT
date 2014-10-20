@@ -18,5 +18,6 @@ public interface Testable {
   }
 
   String getName();
+  String getCanonicalName();
   TestResult runTest();
 }

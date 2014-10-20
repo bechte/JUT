@@ -7,7 +7,6 @@ package de.bechte.jut.core;
 import de.bechte.jut.annotations.Before;
 import de.bechte.jut.annotations.Context;
 import de.bechte.jut.annotations.Test;
-import de.bechte.jut.reporting.ReporterSpy;
 import de.bechte.jut.samples.FailingTestClassSpy;
 import de.bechte.jut.samples.MultipleTestClassSpy;
 import de.bechte.jut.samples.MultipleTestClassWithIgnoreSpy;

@@ -12,6 +12,8 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 public class TestMethod<T> implements Testable {
+  protected static final String CANONICAL_PATTERN = "%s(%s)";
+
   private TestClass<T> testClass;
   private Method methodUnderTest;
 
@@ -23,6 +25,11 @@ public class TestMethod<T> implements Testable {
   @Override
   public String getName() {
     return methodUnderTest.getName();
+  }
+
+  @Override
+  public String getCanonicalName() {
+    return String.format(CANONICAL_PATTERN, testClass.getCanonicalName(), getName());
   }
 
   @Override

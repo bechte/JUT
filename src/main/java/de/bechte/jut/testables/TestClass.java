@@ -41,6 +41,11 @@ public class TestClass<T> implements Testable {
   }
 
   @Override
+  public String getCanonicalName() {
+    return classUnderTest.getCanonicalName();
+  }
+
+  @Override
   public TestResult runTest() {
     TestResultGroup testResultGroup = new TestResultGroup(this);
     Collection<TestResult> testResults = getTests().stream()

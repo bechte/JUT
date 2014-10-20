@@ -29,8 +29,14 @@ public class TestMethodTest {
     }
 
     @Test
-    public void getNameContainsNameOfMethod() throws Exception {
+    public void getNameReturnsNameOfMethod() throws Exception {
       assertThat(testMethod.getName(), is(TEST_METHOD_NAME));
+    }
+
+    @Test
+    public void getCanonicalNameReturnsFullyQualifiedNameOfMethod() throws Exception {
+      assertThat(testMethod.getCanonicalName(), is(String.format(
+          TestMethod.CANONICAL_PATTERN, testClass.getCanonicalName(), TEST_METHOD_NAME)));
     }
 
     @Test

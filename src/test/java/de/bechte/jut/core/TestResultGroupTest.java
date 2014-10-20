@@ -23,6 +23,11 @@ public class TestResultGroupTest {
     assertThat(testResultGroup.getName(), is(TestableStub.NAME));
   }
 
+  @Test
+  public void returnsCanonicalNameFromTestable() throws Exception {
+    assertThat(testResultGroup.getCanonicalName(), is(TestableStub.CANONICAL_NAME));
+  }
+
   @Context
   public class GivenOneSuccessfulEntry {
     @Before

@@ -34,6 +34,11 @@ public class TestResultGroup implements TestResult {
   }
 
   @Override
+  public String getCanonicalName() {
+    return testable.getCanonicalName();
+  }
+
+  @Override
   public Duration getDuration() {
     return Duration.of(getTestResults().stream()
         .map(t -> t.getDuration())

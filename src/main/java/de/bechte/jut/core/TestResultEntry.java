@@ -38,6 +38,11 @@ public class TestResultEntry implements TestResult {
   }
 
   @Override
+  public String getCanonicalName() {
+    return testable.getCanonicalName();
+  }
+
+  @Override
   public Duration getDuration() {
     return Duration.between(testStarted, testEnded);
   }

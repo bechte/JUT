@@ -17,16 +17,16 @@ public class ConsoleReporter implements Reporter {
     Long testsRun = testResults.stream().mapToLong(TestResult::getNumberOfTests).sum();
     Long testsSucceeded = testResults.stream().mapToLong(TestResult::getNumberOfSuccessfulTests).sum();
     Long testsFailed = testResults.stream().mapToLong(TestResult::getNumberOfFailingTests).sum();
-    printHeader(testsRun, testsSucceeded, testsFailed);
     printResults(testResults, 0);
+    printSummary(testsRun, testsSucceeded, testsFailed);
   }
 
-  private void printHeader(Long testsRun, Long testsSucceeded, Long testsFailed) {
+  private void printSummary(Long testsRun, Long testsSucceeded, Long testsFailed) {
+    System.out.println("");
     System.out.println("JUT summary:");
     System.out.println("- Total     : " + testsRun.toString());
     System.out.println("- Succeeded : " + testsSucceeded.toString());
     System.out.println("- Failed    : " + testsFailed.toString());
-    System.out.println("");
   }
 
   private void printResults(Collection<TestResult> testResults, int level) {

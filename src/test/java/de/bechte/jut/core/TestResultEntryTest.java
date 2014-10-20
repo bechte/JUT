@@ -32,6 +32,11 @@ public class TestResultEntryTest {
     }
 
     @Test
+    public void hasCanonicalFromTestable() throws Exception {
+      assertThat(testResultEntry.getCanonicalName(), is(TestableStub.CANONICAL_NAME));
+    }
+
+    @Test
     public void durationIsCalcuatedCorrectly() throws Exception {
       assertThat(testResultEntry.getDuration(), is(Duration.between(testResultEntry.testStarted, testResultEntry.testEnded)));
     }

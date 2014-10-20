@@ -38,6 +38,11 @@ public class TestClassTest {
     }
 
     @Test
+    public void getCanonicalNameReturnsFullyQualifiedNameOfClassUnderTest() throws Exception {
+      assertThat(testClass.getCanonicalName(), is(SingleTestClassSpy.class.getCanonicalName()));
+    }
+
+    @Test
     public void createsTestInstance() throws Exception {
       SingleTestClassSpy instance = testClass.createTestInstance();
       assertThat(instance, is(instanceOf(SingleTestClassSpy.class)));

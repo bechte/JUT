@@ -23,6 +23,11 @@ public class TestResultEntryFake implements TestResult {
   }
 
   @Override
+  public String getCanonicalName() {
+    return TestResultEntryFake.class.getCanonicalName();
+  }
+
+  @Override
   public Duration getDuration() {
     return duration;
   }
