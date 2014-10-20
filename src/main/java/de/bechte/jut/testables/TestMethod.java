@@ -4,33 +4,30 @@
 
 package de.bechte.jut.testables;
 
-import de.bechte.jut.annotations.After;
-import de.bechte.jut.annotations.Before;
 import de.bechte.jut.core.TestResult;
+import de.bechte.jut.core.TestResultEntry;
 import de.bechte.jut.core.Testable;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.Collection;
-import java.util.Collections;
 
 public class TestMethod<T> implements Testable {
   private TestClass<T> testClass;
-  private Method methodUnterTest;
+  private Method methodUnderTest;
 
-  public TestMethod(TestClass<T> testClass, Method methodUnterTest) {
+  public TestMethod(TestClass<T> testClass, Method methodUnderTest) {
     this.testClass = testClass;
-    this.methodUnterTest = methodUnterTest;
+    this.methodUnderTest = methodUnderTest;
   }
 
   @Override
   public String getName() {
-    return String.format("%s#%s", testClass.getName(), methodUnterTest.getName());
+    return methodUnderTest.getName();
   }
 
   @Override
-  public Collection<TestResult> runTests() {
-    TestResult testResult = new TestResult(this);
+  public TestResult runTest() {
+    TestResultEntry testResult = new TestResultEntry(this);
     try {
       invokeTestMethod();
       testResult.success();
@@ -39,17 +36,17 @@ public class TestMethod<T> implements Testable {
     } catch (Throwable t) {
       testResult.fail(t);
     }
-    return Collections.singleton(testResult);
+    return testResult;
   }
 
-  private void invokeTestMethod() throws IllegalAccessException, InvocationTargetException {
+  protected void invokeTestMethod() throws Throwable {
     T testInstance = testClass.createTestInstance();
 
     try {
-      testClass.invokeMethodsForAnnotation(testInstance, Before.class);
-      methodUnterTest.invoke(testInstance);
+      testClass.invokeBeforeMethods(testInstance);
+      methodUnderTest.invoke(testInstance);
     } finally {
-      testClass.invokeMethodsForAnnotation(testInstance, After.class);
+      testClass.invokeAfterMethods(testInstance);
     }
   }
 }

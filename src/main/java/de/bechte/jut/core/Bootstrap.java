@@ -17,7 +17,7 @@ public class Bootstrap {
 
   public static void main(String... arguments) {
     Bootstrap bootstrap = new Bootstrap(arguments);
-    bootstrap.reporter = Optional.of(new ConsoleReporter());
+    bootstrap.setReporter(new ConsoleReporter());
     bootstrap.run();
   }
 
@@ -26,10 +26,14 @@ public class Bootstrap {
     this.reporter = Optional.empty();
   }
 
+  public void setReporter(Reporter reporter) {
+    this.reporter = Optional.ofNullable(reporter);
+  }
+
   public void run() {
     Collection<TestResult> testResults = new LinkedList<>();
     for (String argument : arguments)
-      testResults.addAll(Testable.forName(argument).runTests());
+      testResults.add(Testable.forName(argument).runTest());
     reporter.ifPresent(r -> r.report(testResults));
   }
 }

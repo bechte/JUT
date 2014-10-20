@@ -15,7 +15,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 
 public final class ExpectThrowable {
   public static ExpectThrowable expectThrowable(Class<? extends Throwable> throwable) {
-    return new ExpectThrowable(throwable);
+    return expectThrowable(is(instanceOf(throwable)));
   }
 
   public static ExpectThrowable expectThrowable(Matcher<? super Throwable> throwableMatcher) {
@@ -23,10 +23,6 @@ public final class ExpectThrowable {
   }
 
   private CombinableMatcher<Throwable> throwableMatcher;
-
-  private ExpectThrowable(Class<? extends Throwable> throwable) {
-    this(is(instanceOf(throwable)));
-  }
 
   private ExpectThrowable(Matcher<? super Throwable> throwableMatcher) {
     this.throwableMatcher = new CombinableMatcher<>(throwableMatcher);
@@ -38,7 +34,7 @@ public final class ExpectThrowable {
   }
 
   public ExpectThrowable withMessage(Matcher<String> matcher) {
-    this.throwableMatcher.and(new TypeSafeMatcher<Throwable>() {
+    this.throwableMatcher = this.throwableMatcher.and(new TypeSafeMatcher<Throwable>() {
       @Override
       protected boolean matchesSafely(Throwable item) {
         return matcher.matches(item.getMessage());

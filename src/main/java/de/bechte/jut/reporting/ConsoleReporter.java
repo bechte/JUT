@@ -5,19 +5,20 @@
 package de.bechte.jut.reporting;
 
 import de.bechte.jut.core.TestResult;
+import de.bechte.jut.core.TestResultEntry;
+import de.bechte.jut.core.TestResultGroup;
 
 import java.time.Duration;
 import java.util.Collection;
-import java.util.stream.Collectors;
 
 public class ConsoleReporter implements Reporter {
   @Override
   public void report(Collection<TestResult> testResults) {
-    Long testsRun = Long.valueOf(testResults.size());
-    Long testsSucceeded = testResults.stream().filter(r -> r.isSuccessful()).collect(Collectors.counting());
-    Long testsFailed = testResults.stream().filter(r -> !r.isSuccessful()).collect(Collectors.counting());
+    Long testsRun = testResults.stream().mapToLong(TestResult::getNumberOfTests).sum();
+    Long testsSucceeded = testResults.stream().mapToLong(TestResult::getNumberOfSuccessfulTests).sum();
+    Long testsFailed = testResults.stream().mapToLong(TestResult::getNumberOfFailingTests).sum();
     printHeader(testsRun, testsSucceeded, testsFailed);
-    printResults(testResults);
+    printResults(testResults, 0);
   }
 
   private void printHeader(Long testsRun, Long testsSucceeded, Long testsFailed) {
@@ -28,28 +29,33 @@ public class ConsoleReporter implements Reporter {
     System.out.println("");
   }
 
-  private void printResults(Collection<TestResult> testResults) {
-    for (TestResult testResult : testResults)
-      printResult(testResult);
+  private void printResults(Collection<TestResult> testResults, int level) {
+    for (TestResult testResult : testResults) {
+      printResult(testResult, level);
+      if (testResult instanceof TestResultGroup)
+        printResults(((TestResultGroup)testResult).getTestResults(), level + 1);
+    }
   }
 
-  private void printResult(TestResult testResult) {
-    String name = testResult.getTestName();
+  private void printResult(TestResult testResult, int level) {
+    String levelSpacer = getPlaceholderSpaces(0, level * 2);
+    String name = testResult.getName();
     boolean isSuccessful = testResult.isSuccessful();
-    String duration = formatDuration(testResult.getTestDuration());
+    String duration = formatDuration(testResult.getDuration());
 
     System.out.println(
         String.format(
-            "[%s] %s%s%s",
+            "[%s] %s%s%s%s",
             isSuccessful ? "OKAY" : "FAIL",
+            levelSpacer,
             name,
-            getPlaceholderSpaces(name.length() + duration.length(), 120),
+            getPlaceholderSpaces(levelSpacer.length() + name.length() + duration.length(), 120),
             duration
         )
     );
 
-    if (!isSuccessful) {
-      testResult.getFailure().printStackTrace(System.out);
+    if (!isSuccessful && testResult instanceof TestResultEntry) {
+      ((TestResultEntry)testResult).getFailure().printStackTrace(System.out);
     }
   }
 

@@ -6,8 +6,6 @@ package de.bechte.jut.core;
 
 import de.bechte.jut.testables.TestClass;
 
-import java.util.Collection;
-
 public interface Testable {
   static Testable forName(String name) {
     try {
@@ -20,5 +18,5 @@ public interface Testable {
   }
 
   String getName();
-  Collection<? extends TestResult> runTests();
+  TestResult runTest();
 }
