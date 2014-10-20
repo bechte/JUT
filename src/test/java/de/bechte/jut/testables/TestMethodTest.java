@@ -8,6 +8,8 @@ import de.bechte.jut.annotations.Before;
 import de.bechte.jut.annotations.Context;
 import de.bechte.jut.annotations.Test;
 import de.bechte.jut.core.TestResult;
+import de.bechte.jut.doubles.samples.TestClassWithAlwaysFailingTest;
+import de.bechte.jut.doubles.samples.TestClassWithSingleTest;
 import de.bechte.jut.doubles.samples.TestClassWithSingleTestForTiming;
 import de.bechte.jut.doubles.testables.TestClassMock;
 import de.bechte.jut.doubles.testables.ThrowingTestMethodMock;
@@ -22,17 +24,18 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.lessThanOrEqualTo;
 
 public class TestMethodTest {
+  public static final String TEST_METHOD_NAME = "testMethod";
+
   private TestClassMock<?> testClass;
   private TestMethod<?> testMethod;
 
   @Context
   public class GivenValidTestMethod {
-    public static final String TEST_METHOD_NAME = "toString";
 
     @Before
     public void createTestMethod() throws Exception {
-      testClass = new TestClassMock(new Object());
-      testMethod = new TestMethod<>(testClass, Object.class.getMethod(TEST_METHOD_NAME));
+      testClass = new TestClassMock(new TestClassWithSingleTest());
+      testMethod = new TestMethod<>(testClass, TestClassWithSingleTest.class.getMethod(TEST_METHOD_NAME));
     }
 
     @Test
@@ -54,9 +57,43 @@ public class TestMethodTest {
     }
 
     @Test
-    public void runTestMethodInvokesMethodsOfTheTestClass() throws Throwable {
+    public void setupIsAlwaysCalled() throws Exception {
       testMethod.run();
       assertThat(testClass.testInstanceOnSetup, is(testClass.instance));
+    }
+
+    @Test
+    public void teardownIsAlwaysCalled() throws Exception {
+      testMethod.run();
+      assertThat(testClass.testInstanceOnTeardown, is(testClass.instance));
+    }
+  }
+
+  @Context
+  public class GivenFailingTestMethod {
+    @Before
+    public void createTestMethod() throws Exception {
+      testClass = new TestClassMock(new TestClassWithAlwaysFailingTest());
+      testMethod = new TestMethod<>(testClass, TestClassWithAlwaysFailingTest.class.getMethod(TEST_METHOD_NAME));
+    }
+
+    @Test
+    public void testResultContainsFailure() throws Exception {
+      TestResult testResult = testMethod.run();
+      assertThat(testResult.isSuccessful(), is(false));
+      assertThat(((TestResultEntry)testResult).getFailure(),
+          is(((TestClassWithAlwaysFailingTest)testClass.instance).assertionError));
+    }
+
+    @Test
+    public void setupIsAlwaysCalled() throws Exception {
+      testMethod.run();
+      assertThat(testClass.testInstanceOnSetup, is(testClass.instance));
+    }
+
+    @Test
+    public void teardownIsAlwaysCalled() throws Exception {
+      testMethod.run();
       assertThat(testClass.testInstanceOnTeardown, is(testClass.instance));
     }
   }
@@ -66,7 +103,7 @@ public class TestMethodTest {
     @Before
     public void createTestMethod() throws Exception {
       testClass = new TestClassMock(new TestClassWithSingleTestForTiming());
-      testMethod = new TestMethod<>(testClass, TestClassWithSingleTestForTiming.class.getMethod("testMethod"));
+      testMethod = new TestMethod<>(testClass, TestClassWithSingleTestForTiming.class.getMethod(TEST_METHOD_NAME));
     }
 
     @Test

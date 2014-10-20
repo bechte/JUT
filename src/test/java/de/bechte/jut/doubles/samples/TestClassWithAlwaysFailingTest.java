@@ -9,7 +9,7 @@ import de.bechte.jut.annotations.Before;
 import de.bechte.jut.annotations.Test;
 
 public class TestClassWithAlwaysFailingTest {
-  public static final AssertionError ASSERTION_ERROR = new AssertionError("Always fail!");
+  public final AssertionError assertionError = new AssertionError("Always fail!");
 
   public int beforeMethodInvocations;
   public int afterMethodInvocations;
@@ -28,6 +28,6 @@ public class TestClassWithAlwaysFailingTest {
   @Test
   public void testMethod() {
     testMethodInvocations++;
-    throw ASSERTION_ERROR;
+    throw assertionError;
   }
 }
