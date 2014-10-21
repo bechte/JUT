@@ -5,6 +5,9 @@
 package de.bechte.jut.doubles.testables;
 
 import de.bechte.jut.core.TestResult;
+import de.bechte.jut.core.TestStatus;
+
+import java.time.Duration;
 
 public class NegativeTestableSpy extends TestableSpy {
   public static final String NAME = NegativeTestableSpy.class.getSimpleName();
@@ -22,6 +25,6 @@ public class NegativeTestableSpy extends TestableSpy {
 
   @Override
   public TestResult createTestResult() {
-    return new NegativeTestResultStub();
+    return new TestResult(this, TestStatus.FAILED, Duration.ofMillis(5));
   }
 }

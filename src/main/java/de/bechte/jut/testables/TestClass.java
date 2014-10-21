@@ -6,15 +6,19 @@ package de.bechte.jut.testables;
 
 import de.bechte.jut.annotations.*;
 import de.bechte.jut.core.TestResult;
+import de.bechte.jut.core.TestStatus;
 import de.bechte.jut.core.TestableGroup;
-import de.bechte.jut.reporting.TestResultGroup;
 import de.bechte.jut.core.Testable;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedList;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -40,12 +44,36 @@ public class TestClass<T> implements TestableGroup<T> {
 
   @Override
   public TestResult run() {
-    TestResultGroup testResultGroup = new TestResultGroup(this);
-    Collection<TestResult> testResults = getTests().stream()
-        .map(t -> t.run())
-        .collect(Collectors.toList());
-    testResultGroup.addTestResults(testResults);
-    return testResultGroup;
+    if (classUnderTest.isAnnotationPresent(Ignore.class))
+      return new TestResult(this, TestStatus.SKIPPED, Duration.ZERO);
+
+    LocalDateTime start = LocalDateTime.now();
+    Collection<TestResult> testResults = getTestResults();
+    Duration duration = Duration.between(start, LocalDateTime.now());
+    Collection<Throwable> failures = getFailures(testResults);
+
+    if (failures.isEmpty()) {
+      TestResult testResult = new TestResult(this, TestStatus.SUCCEEDED, duration);
+      testResult.addTestResults(testResults);
+      return testResult;
+    } else {
+      TestResult testResult = new TestResult(this, TestStatus.FAILED, duration);
+      testResult.addTestResults(testResults);
+      testResult.addFailures(failures);
+      return testResult;
+    }
+  }
+
+  private Collection<TestResult> getTestResults() {
+    return getTests().stream()
+          .map(t -> t.run())
+          .collect(Collectors.toList());
+  }
+
+  private Collection<Throwable> getFailures(Collection<TestResult> testResults) {
+    return testResults.stream()
+        .map(r -> r.getFailures())
+        .reduce(new LinkedList<>(), (l, r) -> { l.addAll(r); return l; });
   }
 
   protected Collection<? extends Testable> getTests() {
@@ -57,8 +85,7 @@ public class TestClass<T> implements TestableGroup<T> {
 
   protected Collection<? extends Testable> getTestContexts() {
     return Stream.of(classUnderTest.getClasses())
-        .filter(c -> c.getAnnotationsByType(Context.class).length == 1)
-        .filter(c -> c.getAnnotationsByType(Ignore.class).length == 0)
+        .filter(c -> c.isAnnotationPresent(Context.class))
         .map(c -> testableFactory.forChild(TestClass.this, c))
         .collect(toList());
   }
@@ -71,8 +98,7 @@ public class TestClass<T> implements TestableGroup<T> {
 
   protected Stream<Method> getMethodsForAnnotation(Class<? extends Annotation> annotation) {
     return Stream.of(classUnderTest.getMethods())
-        .filter(c -> c.getAnnotationsByType(annotation).length >= 1)
-        .filter(c -> c.getAnnotationsByType(Ignore.class).length == 0);
+        .filter(c -> c.isAnnotationPresent(annotation));
   }
 
   @Override

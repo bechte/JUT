@@ -6,48 +6,56 @@ package de.bechte.jut.reporting;
 
 import de.bechte.jut.core.Reporter;
 import de.bechte.jut.core.TestResult;
+import de.bechte.jut.core.TestStatus;
 
+import java.io.PrintStream;
 import java.time.Duration;
 import java.util.Collection;
 
 public class ConsoleReporter implements Reporter {
+  private PrintStream out;
+
+  public ConsoleReporter(PrintStream out) {
+    this.out = out;
+  }
+
   @Override
   public void report(Collection<TestResult> testResults) {
     Long testsRun = testResults.stream().mapToLong(TestResult::getNumberOfTests).sum();
     Long testsSucceeded = testResults.stream().mapToLong(TestResult::getNumberOfSuccessfulTests).sum();
+    Long testsSkipped = testResults.stream().mapToLong(TestResult::getNumberOfSkippedTests).sum();
     Long testsFailed = testResults.stream().mapToLong(TestResult::getNumberOfFailingTests).sum();
     printResults(testResults, 0);
-    printSummary(testsRun, testsSucceeded, testsFailed);
+    printSummary(testsRun, testsSucceeded, testsSkipped, testsFailed);
   }
 
-  private void printSummary(Long testsRun, Long testsSucceeded, Long testsFailed) {
-    System.out.println("");
-    System.out.println("JUT summary:");
-    System.out.println("- Total     : " + testsRun.toString());
-    System.out.println("- Succeeded : " + testsSucceeded.toString());
-    System.out.println("- Failed    : " + testsFailed.toString());
+  private void printSummary(Long testsRun, Long testsSucceeded, Long testSkipped, Long testsFailed) {
+    out.println("");
+    out.println("JUT summary:");
+    out.println("- Total     : " + testsRun.toString());
+    out.println("- Succeeded : " + testsSucceeded.toString());
+    out.println("- Skipped   : " + testSkipped.toString());
+    out.println("- Failed    : " + testsFailed.toString());
   }
 
   private void printResults(Collection<TestResult> testResults, int level) {
-    testResults.stream()
-        .sorted((l, r) -> l.getName().compareTo(r.getName()))
-        .forEach(t -> {
-          printResult(t, level);
-          if (t instanceof TestResultGroup)
-            printResults(((TestResultGroup) t).getTestResults(), level + 1);
-        });
+    for (TestResult testResult : testResults) {
+      printResult(testResult, level);
+      printResults(testResult.getTestResults(), level + 1);
+    }
   }
 
   private void printResult(TestResult testResult, int level) {
+    String statusSpacer = getPlaceholderSpaces(testResult.getStatus().toString().length(), 10);
     String levelSpacer = getPlaceholderSpaces(0, level * 2);
     String name = testResult.getName();
-    boolean isSuccessful = testResult.isSuccessful();
     String duration = formatDuration(testResult.getDuration());
 
-    System.out.println(
+    out.println(
         String.format(
-            "[%s] %s%s%s%s",
-            isSuccessful ? "OKAY" : "FAIL",
+            "[%s%s] %s%s%s%s",
+            statusSpacer,
+            testResult.getStatus(),
             levelSpacer,
             name,
             getPlaceholderSpaces(levelSpacer.length() + name.length() + duration.length(), 120),
@@ -55,9 +63,8 @@ public class ConsoleReporter implements Reporter {
         )
     );
 
-    if (!isSuccessful && testResult instanceof TestResultEntry) {
-      ((TestResultEntry)testResult).getFailure().printStackTrace(System.out);
-    }
+    if (testResult.getStatus() == TestStatus.FAILED)
+      testResult.getFailures().forEach(f -> f.printStackTrace(out));
   }
 
   private String formatDuration(Duration duration) {

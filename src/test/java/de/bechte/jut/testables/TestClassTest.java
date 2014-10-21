@@ -8,6 +8,7 @@ import de.bechte.jut.annotations.After;
 import de.bechte.jut.annotations.Before;
 import de.bechte.jut.annotations.Context;
 import de.bechte.jut.annotations.Test;
+import de.bechte.jut.core.TestStatus;
 import de.bechte.jut.doubles.core.PositiveTestableFactorySpy;
 import de.bechte.jut.core.TestResult;
 import de.bechte.jut.core.TestableFactory;
@@ -120,7 +121,7 @@ public class TestClassTest {
 
       @Override
       public Long getNumberOfTestsInClass() {
-        return TestClassWithMultipleTestsIgnored.NUMBER_OF_ACTIVE_TEST_METHODS;
+        return TestClassWithMultipleTestsIgnored.NUMBER_OF_TEST_METHODS;
       }
 
       @Override
@@ -167,7 +168,8 @@ interface HasValidTestClassBehavior {
   @Test
   default void returnTestResultWithValidResults() throws Exception {
     TestResult testResult = getTestClass().run();
-    assertThat(testResult.isSuccessful(), is(true));
+    assertThat(testResult.getStatus(), is(TestStatus.SUCCEEDED));
+    assertThat(testResult.getNumberOfTests(), is(getNumberOfTestsInClass()));
     assertThat(testResult.getNumberOfTests(), is(getNumberOfTestsInClass()));
   }
 

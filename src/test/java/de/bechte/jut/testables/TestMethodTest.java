@@ -8,12 +8,12 @@ import de.bechte.jut.annotations.Before;
 import de.bechte.jut.annotations.Context;
 import de.bechte.jut.annotations.Test;
 import de.bechte.jut.core.TestResult;
+import de.bechte.jut.core.TestStatus;
 import de.bechte.jut.doubles.samples.TestClassWithAlwaysFailingTest;
 import de.bechte.jut.doubles.samples.TestClassWithSingleTest;
 import de.bechte.jut.doubles.samples.TestClassWithSingleTestForTiming;
 import de.bechte.jut.doubles.testables.TestClassMock;
 import de.bechte.jut.doubles.testables.ThrowingTestMethodMock;
-import de.bechte.jut.reporting.TestResultEntry;
 
 import java.lang.reflect.InvocationTargetException;
 import java.time.chrono.ChronoLocalDateTime;
@@ -21,6 +21,8 @@ import java.time.chrono.ChronoLocalDateTime;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.lessThanOrEqualTo;
 
 public class TestMethodTest {
@@ -52,8 +54,8 @@ public class TestMethodTest {
     @Test
     public void testResultContainsNoFailure() throws Exception {
       TestResult testResult = testMethod.run();
-      assertThat(testResult.isSuccessful(), is(true));
-      assertThat(((TestResultEntry)testResult).getFailure(), is(nullValue()));
+      assertThat(testResult.getStatus(), is(TestStatus.SUCCEEDED));
+      assertThat(testResult.getFailures(), is(empty()));
     }
 
     @Test
@@ -80,9 +82,10 @@ public class TestMethodTest {
     @Test
     public void testResultContainsFailure() throws Exception {
       TestResult testResult = testMethod.run();
-      assertThat(testResult.isSuccessful(), is(false));
-      assertThat(((TestResultEntry)testResult).getFailure(),
-          is(((TestClassWithAlwaysFailingTest)testClass.instance).assertionError));
+      assertThat(testResult.getStatus(), is(TestStatus.FAILED));
+      assertThat(testResult.getFailures().size(), is(1));
+      assertThat(testResult.getFailures(),
+          contains(((TestClassWithAlwaysFailingTest) testClass.instance).assertionError));
     }
 
     @Test
@@ -148,8 +151,9 @@ public class TestMethodTest {
     }
 
     private void assertTestResultContainsFailure(TestResult testResult, Throwable failure) {
-      assertThat(testResult.isSuccessful(), is(false));
-      assertThat(((TestResultEntry)testResult).getFailure(), is(failure));
+      assertThat(testResult.getStatus(), is(TestStatus.FAILED));
+      assertThat(testResult.getFailures().size(), is(1));
+      assertThat(testResult.getFailures(), contains(failure));
     }
   }
 }

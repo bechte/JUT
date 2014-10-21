@@ -21,7 +21,7 @@ public class Bootstrap {
     testableFactory = new RuntimeTestableFactory();
 
     Bootstrap bootstrap = new Bootstrap(arguments);
-    bootstrap.setReporter(new ConsoleReporter());
+    bootstrap.setReporter(new ConsoleReporter(System.out));
     bootstrap.run();
   }
 

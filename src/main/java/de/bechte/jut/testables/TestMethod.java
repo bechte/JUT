@@ -4,12 +4,17 @@
 
 package de.bechte.jut.testables;
 
+import de.bechte.jut.annotations.Ignore;
 import de.bechte.jut.core.TestResult;
-import de.bechte.jut.reporting.TestResultEntry;
+import de.bechte.jut.core.TestStatus;
 import de.bechte.jut.core.Testable;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.util.Collection;
+import java.util.Collections;
 
 public class TestMethod<T> implements Testable {
   protected static final String UNIQUE_NAME_FORMAT = "%s.%s";
@@ -34,16 +39,18 @@ public class TestMethod<T> implements Testable {
 
   @Override
   public TestResult run() {
-    TestResultEntry testResult = new TestResultEntry(this);
+    if (methodUnderTest.isAnnotationPresent(Ignore.class))
+      return new TestResult(this, TestStatus.SKIPPED, Duration.ZERO);
+
+    LocalDateTime start = LocalDateTime.now();
     try {
       invokeTestMethod();
-      testResult.success();
+      return handleResponse(start);
     } catch (InvocationTargetException e) {
-      testResult.fail(e.getTargetException());
+      return handleException(start, e.getTargetException());
     } catch (Throwable t) {
-      testResult.fail(t);
+      return handleException(start, t);
     }
-    return testResult;
   }
 
   protected void invokeTestMethod() throws Throwable {
@@ -55,5 +62,17 @@ public class TestMethod<T> implements Testable {
     } finally {
       testClass.teardownTestInstance(testInstance);
     }
+  }
+
+  protected TestResult handleResponse(LocalDateTime start) {
+    Duration duration = Duration.between(start, LocalDateTime.now());
+    return new TestResult(this, TestStatus.SUCCEEDED, duration);
+  }
+
+  protected TestResult handleException(LocalDateTime start, Throwable throwable) {
+    Duration duration = Duration.between(start, LocalDateTime.now());
+    TestResult testResult = new TestResult(this, TestStatus.FAILED, duration);
+    testResult.addFailure(throwable);
+    return testResult;
   }
 }

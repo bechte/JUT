@@ -10,8 +10,8 @@ import de.bechte.jut.testables.TestMethod;
 public class ThrowingTestMethodMock<T extends Throwable> extends TestMethod<Object> {
   private T throwable;
 
-  public ThrowingTestMethodMock(TestClass<Object> testClass, T throwable) {
-    super(testClass, null);
+  public ThrowingTestMethodMock(TestClass<Object> testClass, T throwable) throws NoSuchMethodException {
+    super(testClass, Object.class.getMethod("toString"));
     this.throwable = throwable;
   }
 

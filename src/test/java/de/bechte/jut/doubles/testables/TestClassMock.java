@@ -5,12 +5,16 @@
 package de.bechte.jut.doubles.testables;
 
 import de.bechte.jut.core.TestResult;
+import de.bechte.jut.core.TestStatus;
 import de.bechte.jut.testables.TestClass;
+
+import java.time.Duration;
 
 public class TestClassMock<T> extends TestClass<T> {
   public static final String TEST_CLASS_NAME = "NAME";
   public static final String CANONICAL_NAME = "CANONICAL NAME";
-  public static final TestResult TEST_RESULT = new PositiveTestResultStub();
+  public static final TestResult TEST_RESULT = new TestResult(
+      new PositiveTestableSpy(), TestStatus.SUCCEEDED, Duration.ZERO);
 
   public boolean wasRun;
 

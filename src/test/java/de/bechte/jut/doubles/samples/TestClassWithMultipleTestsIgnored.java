@@ -10,7 +10,7 @@ import de.bechte.jut.annotations.Ignore;
 import de.bechte.jut.annotations.Test;
 
 public class TestClassWithMultipleTestsIgnored {
-  public static Long NUMBER_OF_ACTIVE_TEST_METHODS = 1L;
+  public static Long NUMBER_OF_TEST_METHODS = 3L;
 
   public int beforeMethodInvocations;
   public int afterMethodInvocations;

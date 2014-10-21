@@ -5,6 +5,9 @@
 package de.bechte.jut.doubles.testables;
 
 import de.bechte.jut.core.TestResult;
+import de.bechte.jut.core.TestStatus;
+
+import java.time.Duration;
 
 public class PositiveTestableSpy extends TestableSpy {
   public static final String NAME = PositiveTestableSpy.class.getSimpleName();
@@ -22,6 +25,6 @@ public class PositiveTestableSpy extends TestableSpy {
 
   @Override
   protected TestResult createTestResult() {
-    return new PositiveTestResultStub();
+    return new TestResult(this, TestStatus.SUCCEEDED, Duration.ofMillis(1));
   }
 }
