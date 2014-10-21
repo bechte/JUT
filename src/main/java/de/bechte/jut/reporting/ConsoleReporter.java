@@ -63,7 +63,7 @@ public class ConsoleReporter implements Reporter {
         )
     );
 
-    if (testResult.getStatus() == TestStatus.FAILED)
+    if (testResult.getStatus() == TestStatus.FAILED && testResult.getTestResults().isEmpty())
       testResult.getFailures().forEach(f -> f.printStackTrace(out));
   }
 

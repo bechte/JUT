@@ -36,11 +36,18 @@ public class TestResult {
   }
 
   public TestStatus getStatus() {
-    return status;
+    return testResults.isEmpty() ? status :
+        getNumberOfFailingTests() > 0 ? TestStatus.FAILED :
+        getNumberOfSkippedTests() > 0 ? TestStatus.SKIPPED :
+        TestStatus.SUCCEEDED;
   }
 
   public Duration getDuration() {
-    return duration;
+    return testResults.isEmpty() ? duration :
+        Duration.ofMillis(testResults.stream()
+            .map(r -> r.getDuration())
+            .collect(Collectors.summarizingLong(Duration::toMillis))
+            .getSum());
   }
 
   public void addTestResult(TestResult testResult) {

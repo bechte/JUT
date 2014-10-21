@@ -25,7 +25,7 @@ public class TestResultTest {
   public class GivenOneSuccessfulTestResult {
     @Before
     public void createTestResult() throws Exception {
-      testResult = new TestResult(new PositiveTestableSpy(), SUCCEEDED, ofMillis(5));
+      testResult = new TestResult(new PositiveTestableSpy(), SUCCEEDED, ofMillis(1));
     }
 
     @Test
@@ -40,7 +40,7 @@ public class TestResultTest {
 
     @Test
     public void durationIsReturnedCorrectly() throws Exception {
-      assertThat(testResult.getDuration(), is(ofMillis(5)));
+      assertThat(testResult.getDuration(), is(ofMillis(1)));
     }
 
     @Test
@@ -79,7 +79,7 @@ public class TestResultTest {
     }
 
     @Context
-    public class GivenOneSuccessfulEntriesSubTests {
+    public class GivenOneSuccessfulSubTestResult {
       @Before
       public void addASuccessfulResult() throws Exception {
         testResult.addTestResult(new TestResult(new PositiveTestableSpy(), SUCCEEDED, ofMillis(2)));
@@ -87,7 +87,7 @@ public class TestResultTest {
 
       @Test
       public void durationIsCalculatedCorrectly() throws Exception {
-        assertThat(testResult.getDuration(), is(equalTo(ofMillis(5))));
+        assertThat(testResult.getDuration(), is(equalTo(ofMillis(2))));
       }
 
       @Test
@@ -109,7 +109,125 @@ public class TestResultTest {
       public void getNumberOfFailingTestsIsZero() throws Exception {
         assertThat(testResult.getNumberOfFailingTests(), is(0L));
       }
-      
+
+      @Test
+      public void getNumberOfSkippedTestsIsZero() throws Exception {
+        assertThat(testResult.getNumberOfSkippedTests(), is(0L));
+      }
+
+      @Context
+      public class GivenTwoSuccessfulSubTestResult {
+        @Before
+        public void addAnotherSuccessfulResult() throws Exception {
+          testResult.addTestResult(new TestResult(new PositiveTestableSpy(), SUCCEEDED, ofMillis(2)));
+        }
+
+        @Test
+        public void durationIsCalculatedCorrectly() throws Exception {
+          assertThat(testResult.getDuration(), is(equalTo(ofMillis(4))));
+        }
+
+        @Test
+        public void isMarkedSuccessful() throws Exception {
+          assertThat(testResult.getStatus(), is(TestStatus.SUCCEEDED));
+        }
+
+        @Test
+        public void getNumberOfTestsIsTwo() throws Exception {
+          assertThat(testResult.getNumberOfTests(), is(2L));
+        }
+
+        @Test
+        public void getNumberOfSuccessfulTestsIsTwo() throws Exception {
+          assertThat(testResult.getNumberOfSuccessfulTests(), is(2L));
+        }
+
+        @Test
+        public void getNumberOfFailingTestsIsZero() throws Exception {
+          assertThat(testResult.getNumberOfFailingTests(), is(0L));
+        }
+
+        @Test
+        public void getNumberOfSkippedTestsIsZero() throws Exception {
+          assertThat(testResult.getNumberOfSkippedTests(), is(0L));
+        }
+      }
+
+      @Context
+      public class GivenOneSuccessfulAndOneFailingSubTestResult {
+        @Before
+        public void addAnotherFailedResult() throws Exception {
+          testResult.addTestResult(new TestResult(new NegativeTestableSpy(), FAILED, ofMillis(2)));
+        }
+
+        @Test
+        public void durationIsCalculatedCorrectly() throws Exception {
+          assertThat(testResult.getDuration(), is(equalTo(ofMillis(4))));
+        }
+
+        @Test
+        public void isMarkedSuccessful() throws Exception {
+          assertThat(testResult.getStatus(), is(TestStatus.FAILED));
+        }
+
+        @Test
+        public void getNumberOfTestsIsTwo() throws Exception {
+          assertThat(testResult.getNumberOfTests(), is(2L));
+        }
+
+        @Test
+        public void getNumberOfSuccessfulTestsIsOne() throws Exception {
+          assertThat(testResult.getNumberOfSuccessfulTests(), is(1L));
+        }
+
+        @Test
+        public void getNumberOfFailingTestsIsOne() throws Exception {
+          assertThat(testResult.getNumberOfFailingTests(), is(1L));
+        }
+
+        @Test
+        public void getNumberOfSkippedTestsIsZero() throws Exception {
+          assertThat(testResult.getNumberOfSkippedTests(), is(0L));
+        }
+
+        @Context
+        public class GivenOneSuccessfulAndOneFailingAndOneSkippedSubTestResult {
+          @Before
+          public void addAnotherFailedResult() throws Exception {
+            testResult.addTestResult(new TestResult(new PositiveTestableSpy(), SKIPPED, ofMillis(2)));
+          }
+
+          @Test
+          public void durationIsCalculatedCorrectly() throws Exception {
+            assertThat(testResult.getDuration(), is(equalTo(ofMillis(6))));
+          }
+
+          @Test
+          public void isMarkedSuccessful() throws Exception {
+            assertThat(testResult.getStatus(), is(TestStatus.FAILED));
+          }
+
+          @Test
+          public void getNumberOfTestsIsTwo() throws Exception {
+            assertThat(testResult.getNumberOfTests(), is(3L));
+          }
+
+          @Test
+          public void getNumberOfSuccessfulTestsIsOne() throws Exception {
+            assertThat(testResult.getNumberOfSuccessfulTests(), is(1L));
+          }
+
+          @Test
+          public void getNumberOfFailingTestsIsOne() throws Exception {
+            assertThat(testResult.getNumberOfFailingTests(), is(1L));
+          }
+
+          @Test
+          public void getNumberOfSkippedTestsIsZero() throws Exception {
+            assertThat(testResult.getNumberOfSkippedTests(), is(1L));
+          }
+        }
+      }
     }
   }
 
