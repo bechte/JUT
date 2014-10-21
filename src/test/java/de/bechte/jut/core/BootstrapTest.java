@@ -13,8 +13,7 @@ import java.util.stream.Collectors;
 
 import static de.bechte.jut.core.ApplicationContext.testableFactory;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.*;
 
 public class BootstrapTest {
   private static String[] ARGUMENTS = new String[] { "First", "Second", "Third" };

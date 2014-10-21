@@ -20,9 +20,9 @@ import de.bechte.jut.doubles.samples.TestClassWithPrivateConstructor;
 
 import static de.bechte.jut.core.ApplicationContext.testableFactory;
 import static de.bechte.jut.matchers.ExpectThrowable.expectThrowable;
-import static org.hamcrest.CoreMatchers.instanceOf;
-import static org.hamcrest.CoreMatchers.is;
+
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.*;
 
 public class TestClassTest {
   @Test

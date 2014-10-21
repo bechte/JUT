@@ -6,12 +6,12 @@ package de.bechte.jut.matchers;
 
 import de.bechte.jut.annotations.Before;
 import de.bechte.jut.annotations.Context;
-import de.bechte.jut.annotations.Ignore;
 import de.bechte.jut.annotations.Test;
 
 import static de.bechte.jut.matchers.ExpectThrowable.expectThrowable;
-import static org.hamcrest.CoreMatchers.is;
+
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.*;
 
 public class ExpectThrowableTest {
   ExpectThrowable expectThrowable = expectThrowable(RuntimeException.class);

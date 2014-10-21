@@ -10,6 +10,7 @@ import de.bechte.jut.annotations.Test;
 import de.bechte.jut.core.TestResult;
 import de.bechte.jut.core.TestStatus;
 import de.bechte.jut.doubles.samples.TestClassWithAlwaysFailingTest;
+import de.bechte.jut.doubles.samples.TestClassWithSingleIgnoredTest;
 import de.bechte.jut.doubles.samples.TestClassWithSingleTest;
 import de.bechte.jut.doubles.samples.TestClassWithSingleTestForTiming;
 import de.bechte.jut.doubles.testables.TestClassMock;
@@ -18,12 +19,8 @@ import de.bechte.jut.doubles.testables.ThrowingTestMethodMock;
 import java.lang.reflect.InvocationTargetException;
 import java.time.chrono.ChronoLocalDateTime;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.Matchers.lessThanOrEqualTo;
+import static org.hamcrest.Matchers.*;
 
 public class TestMethodTest {
   public static final String TEST_METHOD_NAME = "testMethod";
@@ -98,6 +95,34 @@ public class TestMethodTest {
     public void teardownIsAlwaysCalled() throws Exception {
       testMethod.run();
       assertThat(testClass.testInstanceOnTeardown, is(testClass.instance));
+    }
+  }
+
+  @Context
+  public class GivenIgnoredTestMethod {
+    @Before
+    public void createTestMethod() throws Exception {
+      testClass = new TestClassMock(new TestClassWithSingleIgnoredTest());
+      testMethod = new TestMethod<>(testClass, TestClassWithSingleIgnoredTest.class.getMethod(TEST_METHOD_NAME));
+    }
+
+    @Test
+    public void testResultContainNoFailure() throws Exception {
+      TestResult testResult = testMethod.run();
+      assertThat(testResult.getStatus(), is(TestStatus.SKIPPED));
+      assertThat(testResult.getFailures(), is(empty()));
+    }
+
+    @Test
+    public void setupIsAlwaysCalled() throws Exception {
+      testMethod.run();
+      assertThat(testClass.testInstanceOnSetup, is(nullValue()));
+    }
+
+    @Test
+    public void teardownIsAlwaysCalled() throws Exception {
+      testMethod.run();
+      assertThat(testClass.testInstanceOnTeardown, is(nullValue()));
     }
   }
 

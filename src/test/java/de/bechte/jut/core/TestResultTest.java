@@ -13,6 +13,7 @@ import de.bechte.jut.doubles.testables.PositiveTestableSpy;
 import static de.bechte.jut.core.TestStatus.FAILED;
 import static de.bechte.jut.core.TestStatus.SKIPPED;
 import static de.bechte.jut.core.TestStatus.SUCCEEDED;
+
 import static java.time.Duration.ofMillis;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;

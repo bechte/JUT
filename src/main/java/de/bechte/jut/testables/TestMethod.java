@@ -13,8 +13,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.Collection;
-import java.util.Collections;
 
 public class TestMethod<T> implements Testable {
   protected static final String UNIQUE_NAME_FORMAT = "%s.%s";

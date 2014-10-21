@@ -6,7 +6,6 @@ package de.bechte.jut.testables;
 
 import de.bechte.jut.annotations.Before;
 import de.bechte.jut.annotations.Context;
-import de.bechte.jut.annotations.Ignore;
 import de.bechte.jut.annotations.Test;
 import de.bechte.jut.doubles.testables.TestClassMock;
 import de.bechte.jut.doubles.samples.TestContextWithConflictingSetupAndTeardowns;
@@ -15,9 +14,9 @@ import de.bechte.jut.doubles.samples.TestContextWithSingleTest;
 
 import static de.bechte.jut.matchers.ExpectThrowable.expectThrowable;
 import static de.bechte.jut.doubles.samples.TestContextWithConflictingSetupAndTeardowns.Priority;
-import static org.hamcrest.CoreMatchers.instanceOf;
-import static org.hamcrest.CoreMatchers.is;
+
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.*;
 
 public class TestContextTest {
   @Test
