@@ -10,6 +10,8 @@ import de.bechte.jut.annotations.Test;
 import de.bechte.jut.doubles.testables.NegativeTestableSpy;
 import de.bechte.jut.doubles.testables.PositiveTestableSpy;
 
+import java.util.Arrays;
+
 import static de.bechte.jut.core.TestStatus.FAILED;
 import static de.bechte.jut.core.TestStatus.SKIPPED;
 import static de.bechte.jut.core.TestStatus.SUCCEEDED;
@@ -17,6 +19,7 @@ import static de.bechte.jut.core.TestStatus.SUCCEEDED;
 import static java.time.Duration.ofMillis;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.contains;
 
 public class TestResultTest {
   private TestResult testResult;
@@ -270,6 +273,24 @@ public class TestResultTest {
     public void returnsTheCorrectFailure() throws Exception {
       assertThat(testResult.getFailures().size(), is(1));
       assertThat(testResult.getFailures(), contains(failure));
+    }
+  }
+
+  @Context
+  public class GivenMultipleFailingTestResults {
+    AssertionError failure1 = new AssertionError("FAIL1");
+    AssertionError failure2 = new AssertionError("FAIL2");
+
+    @Before
+    public void createTestResults() throws Exception {
+      testResult = new TestResult(new NegativeTestableSpy(), FAILED, ofMillis(5));
+      testResult.addFailures(Arrays.asList(failure1, failure2));
+    }
+
+    @Test
+    public void returnsTheCorrectFailures() throws Exception {
+      assertThat(testResult.getFailures().size(), is(2));
+      assertThat(testResult.getFailures(), containsInAnyOrder(failure1, failure2));
     }
   }
 
